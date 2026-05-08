@@ -1,0 +1,47 @@
+name: Mobile CI (Phase 4)
+
+on:
+  workflow_call:
+  push:
+    branches: [main]
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/ci-mobile.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/ci-mobile.yml'
+
+jobs:
+  test:
+    name: Jest + Coverage
+    runs-on: ubuntu-22.04
+
+    defaults:
+      run:
+        working-directory: mobile
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node.js 20 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: 패키지 설치
+        run: npm ci
+
+      - name: Phase 4 — 단위·컴포넌트 테스트 (coverage ≥ 80%)
+        run: npm run test:coverage
+
+      - name: 커버리지 리포트 업로드
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mobile-coverage
+          path: mobile/coverage/
+          retention-days: 7

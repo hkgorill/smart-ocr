@@ -1,0 +1,79 @@
+name: Python CI (Phase 1·2)
+
+on:
+  workflow_call:
+  push:
+    branches: [main]
+    paths:
+      - 'core/**'
+      - 'api/**'
+      - 'tests/**'
+      - 'requirements.txt'
+      - 'pytest.ini'
+      - '.coveragerc'
+      - '.github/workflows/ci-python.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'core/**'
+      - 'api/**'
+      - 'tests/**'
+      - 'requirements.txt'
+      - 'pytest.ini'
+      - '.coveragerc'
+      - '.github/workflows/ci-python.yml'
+
+jobs:
+  test:
+    name: Python ${{ matrix.python-version }}
+    runs-on: ubuntu-22.04
+
+    strategy:
+      matrix:
+        python-version: ['3.11']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: OpenCV 시스템 의존성 설치
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            libglib2.0-0 libsm6 libxext6 libxrender-dev libgl1
+
+      - name: Python ${{ matrix.python-version }} 설정
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: 패키지 설치
+        run: pip install -r requirements.txt
+
+      - name: Phase 1 — OCR Core 테스트 (coverage ≥ 90%)
+        run: |
+          pytest tests/unit/ tests/integration/ \
+            -m "not accuracy and not slow" \
+            --cov=core \
+            --cov-report=term-missing \
+            --cov-report=xml:coverage-core.xml \
+            --cov-fail-under=90
+
+      - name: Phase 2 — API 서버 테스트 (coverage ≥ 85%)
+        run: |
+          pytest tests/api/ \
+            --cov=api \
+            --cov-report=term-missing \
+            --cov-report=xml:coverage-api.xml \
+            --cov-fail-under=85
+
+      - name: 커버리지 리포트 업로드
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: python-coverage-${{ matrix.python-version }}
+          path: |
+            coverage-core.xml
+            coverage-api.xml
+          retention-days: 7

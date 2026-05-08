@@ -1,0 +1,53 @@
+name: Web CI (Phase 3)
+
+on:
+  workflow_call:
+  push:
+    branches: [main]
+    paths:
+      - 'web/**'
+      - '.github/workflows/ci-web.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'web/**'
+      - '.github/workflows/ci-web.yml'
+
+jobs:
+  test:
+    name: Vitest + Coverage
+    runs-on: ubuntu-22.04
+
+    defaults:
+      run:
+        working-directory: web
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node.js 20 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: 패키지 설치
+        run: npm ci
+
+      - name: 타입 검사
+        run: npx tsc --noEmit -p tsconfig.app.json
+
+      - name: 린트
+        run: npm run lint
+
+      - name: Phase 3 — 단위·컴포넌트 테스트 (coverage ≥ 80%)
+        run: npm run test:coverage
+
+      - name: 커버리지 리포트 업로드
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: web-coverage
+          path: web/coverage/
+          retention-days: 7

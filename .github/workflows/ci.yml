@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # 변경된 영역을 감지하여 각 CI 워크플로 트리거 여부를 결정
+  changes:
+    name: 변경 감지
+    runs-on: ubuntu-22.04
+    outputs:
+      python: ${{ steps.filter.outputs.python }}
+      web: ${{ steps.filter.outputs.web }}
+      mobile: ${{ steps.filter.outputs.mobile }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            python:
+              - 'core/**'
+              - 'api/**'
+              - 'tests/**'
+              - 'requirements.txt'
+              - 'pytest.ini'
+              - '.coveragerc'
+            web:
+              - 'web/**'
+            mobile:
+              - 'mobile/**'
+
+  python:
+    name: Python (Phase 1·2)
+    needs: changes
+    if: ${{ needs.changes.outputs.python == 'true' || github.event_name == 'push' }}
+    uses: ./.github/workflows/ci-python.yml
+
+  web:
+    name: Web (Phase 3)
+    needs: changes
+    if: ${{ needs.changes.outputs.web == 'true' || github.event_name == 'push' }}
+    uses: ./.github/workflows/ci-web.yml
+
+  mobile:
+    name: Mobile (Phase 4)
+    needs: changes
+    if: ${{ needs.changes.outputs.mobile == 'true' || github.event_name == 'push' }}
+    uses: ./.github/workflows/ci-mobile.yml
+
+  # 모든 CI가 통과해야 머지 가능한 단일 게이트 역할
+  ci-gate:
+    name: CI Gate
+    runs-on: ubuntu-22.04
+    needs: [python, web, mobile]
+    if: always()
+    steps:
+      - name: 결과 확인
+        run: |
+          results=("${{ needs.python.result }}" "${{ needs.web.result }}" "${{ needs.mobile.result }}")
+          for r in "${results[@]}"; do
+            if [[ "$r" == "failure" || "$r" == "cancelled" ]]; then
+              echo "CI 실패: $r"
+              exit 1
+            fi
+          done
+          echo "모든 CI 통과"
