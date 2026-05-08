@@ -36,7 +36,7 @@ jobs:
         run: npm ci
 
       - name: 타입 검사
-        run: npx tsc --noEmit -p tsconfig.app.json
+        run: npx tsc --noEmit -p tsconfig.test.json
 
       - name: 린트
         run: npm run lint

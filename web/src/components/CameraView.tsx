@@ -1,3 +1,4 @@
+import type React from 'react'
 import { useCamera } from '../hooks/useCamera'
 import type { OCRBlock } from '../types/ocr'
 
@@ -14,7 +15,7 @@ export function CameraView({ apiKey = '', onResults }: Props) {
     <div data-testid="camera-view">
       <div style={{ position: 'relative', display: 'inline-block' }}>
         <video
-          ref={videoRef}
+          ref={videoRef as React.RefObject<HTMLVideoElement>}
           data-testid="camera-video"
           autoPlay
           playsInline
@@ -79,7 +80,7 @@ export function CameraView({ apiKey = '', onResults }: Props) {
       </div>
 
       {/* 최신 인식 결과 전달 */}
-      {onResults && streamResults.length > 0 && onResults(streamResults)}
+      {onResults && streamResults.length > 0 && (onResults(streamResults), null)}
     </div>
   )
 }
