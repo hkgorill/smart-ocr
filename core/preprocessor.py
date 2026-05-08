@@ -32,7 +32,7 @@ def normalize_resolution(img: np.ndarray) -> np.ndarray:
     if _MIN_LONG_SIDE <= long_side <= _MAX_LONG_SIDE:
         return img
     scale = _MIN_LONG_SIDE / long_side if long_side < _MIN_LONG_SIDE else _MAX_LONG_SIDE / long_side
-    new_w, new_h = int(w * scale), int(h * scale)
+    new_w, new_h = round(w * scale), round(h * scale)
     interp = cv2.INTER_CUBIC if scale > 1 else cv2.INTER_AREA
     return cv2.resize(img, (new_w, new_h), interpolation=interp)
 
