@@ -1,5 +1,4 @@
 import { expect, test } from '@playwright/test'
-import path from 'path'
 
 test.describe('이미지 업로드 OCR', () => {
   test.beforeEach(async ({ page }) => {

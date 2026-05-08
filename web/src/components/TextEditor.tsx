@@ -9,8 +9,9 @@ export function TextEditor({ blocks }: Props) {
   const [text, setText] = useState(() => blocks.map((b) => b.text).join('\n'))
   const [copied, setCopied] = useState(false)
 
-  // blocks가 교체될 때만 텍스트 동기화 (사용자 편집 중에는 유지)
+  // blocks prop이 교체될 때 텍스트를 동기화 (사용자 편집 중에는 유지)
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setText(blocks.map((b) => b.text).join('\n'))
   }, [blocks])
 
