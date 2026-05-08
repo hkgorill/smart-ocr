@@ -1,0 +1,14 @@
+[run]
+source = core
+omit =
+    tests/*
+    scripts/*
+    .venv/*
+
+[report]
+show_missing = true
+fail_under = 90
+exclude_lines =
+    # CLI 진입점은 직접 실행 시에만 동작하므로 커버리지 제외
+    if __name__ == .__main__.:
+    def main\(\)

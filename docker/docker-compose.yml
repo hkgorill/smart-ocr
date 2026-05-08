@@ -1,0 +1,13 @@
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - SMARTOCR_API_KEY=${SMARTOCR_API_KEY:-change-me}
+      - SMARTOCR_OCR_LANG=${SMARTOCR_OCR_LANG:-ko}
+    volumes:
+      - ../models:/app/models
+    restart: unless-stopped
