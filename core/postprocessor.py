@@ -47,14 +47,14 @@ def clean_text(text: str) -> str:
 
 
 def filter_low_confidence(blocks: list[dict],
-                           threshold: float = 0.5) -> list[dict]:
+                           threshold: float = 0.3) -> list[dict]:
     """신뢰도 threshold 미만 블록 제거."""
     return [b for b in blocks if b["confidence"] >= threshold]
 
 
 def postprocess(blocks: list[dict],
                 *,
-                confidence_threshold: float = 0.5,
+                confidence_threshold: float = 0.3,
                 sort: bool = True) -> list[dict]:
     """후처리 파이프라인 진입점."""
     blocks = filter_low_confidence(blocks, confidence_threshold)

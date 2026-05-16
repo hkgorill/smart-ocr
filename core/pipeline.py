@@ -29,12 +29,13 @@ class OCRPipeline:
     def __init__(
         self,
         lang: str = "ko",
+        engine_type: str = "easyocr",
         use_gpu: bool = False,
-        confidence_threshold: float = 0.5,
-        denoise_img: bool = True,
+        confidence_threshold: float = 0.3,
+        denoise_img: bool = False,
         deskew_img: bool = True,
     ) -> None:
-        self._engine = OCREngine.get(lang=lang, use_gpu=use_gpu)
+        self._engine = OCREngine.get(engine_type=engine_type, lang=lang, use_gpu=use_gpu)
         self._conf_threshold = confidence_threshold
         self._denoise = denoise_img
         self._deskew = deskew_img
@@ -70,6 +71,8 @@ def main() -> None:  # pragma: no cover
     parser.add_argument("--input", required=True, help="이미지 파일 경로")
     parser.add_argument("--lang", default="ko", choices=["ko", "en", "ch"],
                         help="인식 언어 (기본: ko)")
+    parser.add_argument("--engine", default="easyocr", choices=["easyocr", "paddle"],
+                        help="OCR 엔진 (기본: easyocr)")
     parser.add_argument("--json", action="store_true", help="JSON 형식으로 출력")
     parser.add_argument("--no-denoise", action="store_true")
     parser.add_argument("--no-deskew", action="store_true")
@@ -77,6 +80,7 @@ def main() -> None:  # pragma: no cover
 
     pipeline = OCRPipeline(
         lang=args.lang,
+        engine_type=args.engine,
         denoise_img=not args.no_denoise,
         deskew_img=not args.no_deskew,
     )

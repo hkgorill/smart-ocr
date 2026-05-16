@@ -2,8 +2,9 @@
 setuptools
 
 # OCR Core — Phase 1
-paddlepaddle==2.6.2
-paddleocr==2.8.1
+easyocr
+paddlepaddle>=3.0.0
+paddleocr>=2.8.1
 opencv-python-headless==4.10.0.84
 Pillow==10.4.0
 numpy==1.26.4

@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     api_key: str = "dev-secret-key"
     rate_limit: str = "60/minute"       # slowapi 형식
     ocr_lang: str = "ko"
+    ocr_engine: str = "easyocr"         # "easyocr" | "paddle"
     max_file_size_mb: int = 10
     allowed_content_types: list[str] = ["image/jpeg", "image/png", "image/webp"]
 

@@ -43,19 +43,22 @@ def denoise(img: np.ndarray) -> np.ndarray:
                                            templateWindowSize=7, searchWindowSize=21)
 
 
+_MAX_DESKEW_ANGLE = 10.0  # 이 이상은 오감지로 간주하고 보정하지 않음
+
+
 def deskew(img: np.ndarray) -> np.ndarray:
     """텍스트 기울기를 감지해 수평으로 보정."""
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    # Canny → 좌표 추출 → minAreaRect 로 기울기 측정
     edges = cv2.Canny(gray, 50, 150, apertureSize=3)
     coords = np.column_stack(np.where(edges > 0))
     if len(coords) < 10:
         return img
     angle = cv2.minAreaRect(coords)[-1]
-    # minAreaRect 는 -90~0° 범위로 반환; 45° 초과 기울기는 무시
+    # minAreaRect 는 -90~0° 범위로 반환
     if angle < -45:
         angle += 90
-    if abs(angle) < 0.5:
+    # 실제 문서 기울기 범위를 벗어나면 오감지로 간주
+    if abs(angle) < 0.5 or abs(angle) > _MAX_DESKEW_ANGLE:
         return img
     h, w = img.shape[:2]
     center = (w // 2, h // 2)

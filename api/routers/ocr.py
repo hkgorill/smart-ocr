@@ -73,11 +73,12 @@ def _blocks_to_schema(blocks: list[dict]) -> list[OCRBlock]:
 @router.post("/image", response_model=OCRResponse)
 async def ocr_image(
     file: UploadFile = File(...),
-    pipeline: OCRPipeline = Depends(get_pipeline),
+    engine: str | None = None,
     _key: str = Depends(require_api_key),
     _rate: None = Depends(_image_rate_limit),
 ) -> OCRResponse:
     """이미지 파일을 업로드해 OCR 결과를 즉시 반환."""
+    pipeline = get_pipeline(engine=engine)
     data = await validate_image(file)
     img = Image.open(BytesIO(data)).convert("RGB")
     blocks = pipeline.run(np.array(img))

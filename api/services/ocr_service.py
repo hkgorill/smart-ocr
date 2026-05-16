@@ -11,15 +11,19 @@ from core.pipeline import OCRPipeline
 
 
 @cache
-def _build_pipeline(lang: str) -> OCRPipeline:
-    """언어별 파이프라인을 한 번만 생성 (모델 로딩 비용 최소화)."""
-    return OCRPipeline(lang=lang)
+def _build_pipeline(lang: str, engine_type: str) -> OCRPipeline:
+    """언어·엔진별 파이프라인을 한 번만 생성 (모델 로딩 비용 최소화)."""
+    return OCRPipeline(lang=lang, engine_type=engine_type)
 
 
-def get_pipeline() -> OCRPipeline:
-    """FastAPI 의존성 — 테스트에서 dependency_overrides 로 교체."""
+def get_pipeline(engine: str | None = None) -> OCRPipeline:
+    """FastAPI 의존성 — 테스트에서 dependency_overrides 로 교체.
+
+    engine: 요청별 엔진 override ("easyocr" | "paddle"). None 이면 설정값 사용.
+    """
     settings = get_settings()
-    return _build_pipeline(settings.ocr_lang)
+    engine_type = engine if engine in ("easyocr", "paddle") else settings.ocr_engine
+    return _build_pipeline(settings.ocr_lang, engine_type)
 
 
 async def validate_image(file: UploadFile) -> bytes:
